@@ -766,7 +766,40 @@ tpl:
   #   }
 ```
 
-其中以下部分按需使用
+其中下面列明部分按需使用。如果不需要可以不在代码中编写
   - createStyles 用于创建样式
   - toolBarRender 用于自定义工具栏。比如导出按钮。
-  - ModalForm 是当前页面的弹窗。用于新增编辑操作。
+  - ModalForm 用于新增编辑操作。
+
+## 代码要求
+
+输出代码格式要求：
+
+- 如果是页面代码。需要在`config/routes`中正确配置路由并在`pages`目录下创建对应的页面组件代码。
+- 枚举文件/mock接口 等单独编写
+- 使用代码块包裹，标明语言（tsx, ts）
+- 加必要注释说明关键逻辑
+- 枚举文件固定路径。 **~/enums/E{NAME}.ts**。一个枚举一个文件。并且需要写好 M{NAME} 与 O{NAME} 衍生对象。示例如下
+
+```ts
+/**
+ * 短信code场景值
+ */
+export enum ECodeScene {
+  /** 注册 */
+  REG = 'REG',
+  /** 忘记密码 */
+  FORGOT = 'FORGOT'
+}
+export const MCodeScene = {
+  [ECodeScene.REG]: '注册',
+  [ECodeScene.FORGOT]: '忘记密码'
+}
+
+export const OCodeScene = [
+  { value: ECodeScene.REG, label: '注册' },
+  { value: ECodeScene.FORGOT, label: '忘记密码' }
+]
+```
+
+- 如有多文件协同，明确写好文件路径和引用关系。相对路径alias是 `~` 符号
