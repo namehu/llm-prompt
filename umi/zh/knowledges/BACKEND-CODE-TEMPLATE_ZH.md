@@ -707,7 +707,8 @@ export function useSuperLock<T extends (...args: any) => any>(fun: T, delay = 50
 - createStyles 用于创建样式
 - toolBarRender 用于自定义工具栏。比如导出按钮。
 - ModalForm 用于新增编辑操作。
-- 表单页面模板主体格式尤其是jsx部分必须保留布局格式
+- 页面模板主体格式尤其是jsx部分必须保留布局格式
+- 文件中有诸如[:=xxx:]的字符。这是模板变量。在生成模板的过程中。你可以通过模板变量来进行更加细致的控制。支持的变量有: CamelCaseName 组件驼峰命名;PascalName 组件帕斯卡命名;KebabCaseName 组件横杠线命名;UnderlineCase 下划线命名;dirname 组件目录名
 
 #### umi-max-function-page.yml umi 页面模板
 
@@ -715,8 +716,6 @@ export function useSuperLock<T extends (...args: any) => any>(fun: T, delay = 50
 name: '@wmeimob/umi-max-function-page'
 description: |
   Umi4 函数式页面模板，其中
-  文件中有诸如[:=xxx:]的字符。这是模板变量。在生成模板的过程中。你可以通过模板变量来进行更加细致的控制。支持的变量有: CamelCaseName 组件驼峰命名;PascalName 组件帕斯卡命名;KebabCaseName 组件横杠线命名;UnderlineCase 下划线命名;dirname 组件目录名
-tpl:
   index.tsx: >
     import { FC, memo, useState } from 'react'\n
     import { Button } from 'antd'\n
@@ -830,8 +829,6 @@ tpl:
 name: '@wmeimob/umi-max-function-form-page'
 description: |
   Umi4 函数式表单页面模板，其中包含了一个表单组件，用于提交数据。
-  文件中有诸如[:=xxx:]的字符。这是模板变量。在生成模板的过程中。你可以通过模板变量来进行更加细致的控制。支持的变量有: CamelCaseName 组件驼峰命名;PascalName 组件帕斯卡命名;KebabCaseName 组件横杠线命名;UnderlineCase 下划线命名;dirname 组件目录名
-tpl:
   index.tsx: >
     import { FC, memo, useEffect, useRef, useState } from 'react'
     import { FooterToolbar, PageContainer, ProForm, ProFormText, ProFormInstance } from '@ant-design/pro-components'
@@ -931,6 +928,103 @@ tpl:
   index.module.less: |
     .[:=CamelCaseName:]Style {
     }
+```
+
+#### umi-max-function-detail-page.yml 详情页面模板
+
+```yml
+name: '@wmeimob/umi-max-function-detail-page'
+description: |
+  Umi4 函数式详情页面模板，其中包含了一个详情组件，用于展示数据。
+tpl:
+  index.tsx: >
+    import { FC, memo, useEffect, useState } from 'react'
+    import { PageContainer, ProDescriptions } from '@ant-design/pro-components'
+    import { history } from '@umijs/max'
+    import { api } from '~/request'
+    import { Button, Card, Image } from 'antd'
+    import { useRouterParams } from '@wmeimob/backend-pro/src/hooks/useRouterParams'
+    import { createStyles } from 'antd-style'
+
+    const useStyles = createStyles(() => ({
+      companyDetailStyle: {}
+    }))
+
+    interface I[:=PascalName:]Detail {
+      id: string
+      name: string
+      logo?: string
+      contact?: string
+    }
+
+    // 详情页面
+    const Component: FC = () => {
+      const { styles } = useStyles()
+      const [{ id }] = useRouterParams<{ id: string }>()
+
+      const [detail, setDetail] = useState<I[:=PascalName:]Detail>()
+      const [loading, setLoading] = useState<boolean>(false)
+
+      // 获取详情
+      useEffect(() => {
+        async function fetchDetail() {
+          try {
+            setLoading(true)
+            const { data } = await api.get['/mock/:=KebabCaseName:/detail/:id']({ id })
+            setDetail(data)
+          } finally {
+            setLoading(false)
+          }
+        }
+
+        if (id) {
+          fetchDetail()
+        }
+      }, [id])
+
+      return (
+        <PageContainer
+          className={styles[:=CamelCaseName:]DetailStyle}
+          loading={loading}
+          footer={[
+            <Button key="back" onClick={() => history.back()}>
+              返回
+            </Button>
+          ]}
+        >
+          <Card>
+            <ProDescriptions
+              column={1}
+              bordered
+              labelStyle={{ width: 240 }}
+              dataSource={detail}
+              columns={[
+                {
+                  title: '名称',
+                  dataIndex: 'name'
+                },
+                {
+                  title: 'Logo',
+                  dataIndex: 'logo',
+                  render: (_, record) => (
+                    <div className={styles.logoContainer}>
+                      <Image width={80} height={80} src={record.logo} alt="Logo" />
+                    </div>
+                  )
+                },
+                {
+                  title: '联系人',
+                  dataIndex: 'contact'
+                }
+              ]}
+            />
+          </Card>
+        </PageContainer>
+      )
+    }
+
+    const [:=PascalName:]Detail = memo(Component)
+    export default [:=PascalName:]Detail
 ```
 
 ### 代码要求
