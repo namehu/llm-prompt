@@ -1,4 +1,4 @@
-## 代码模板
+## 代码编写模板
 
 以下会列出在UMI框架下常用的代码模板。请你根据用户需求，选择合适的模板。严格按照团队编码规范编写。
 
@@ -10,6 +10,8 @@
 .
 ├── components
 │   ├── backend-pro
+│   │   ├── src/components
+│   │   ├── src/hooks
 │   ├── utils
 │   └── react-hooks
 ├── packages
@@ -25,9 +27,9 @@
 └── tsconfig.json
 ```
 
-#### backend-pro
+### backend-pro
 
-- components\backend-pro\src\index.ts
+#### components\backend-pro\src\index.ts
 
 ```ts
 import { App } from 'antd'
@@ -50,53 +52,7 @@ export default () => {
 export { message, notification, modal }
 ```
 
-- components\react-hooks\src\useSuperLock.ts
-
-```ts
-import { useState, useRef } from 'react'
-
-/**
- * 超级锁钩子。未运行完毕锁。500毫秒运行一次锁。运行成功500毫秒后才能运行锁。
- *
- * @param setLoading
- * @param fun
- */
-export function useSuperLock<T extends (...args: any) => any>(fun: T, delay = 500) {
-  const [lock, setLock] = useState(false)
-  const lastDate = useRef<Date>()
-
-  const fn: any = async (...args: Parameters<T>) => {
-    if (lock) {
-      return
-    }
-
-    const nowDate = new Date()
-    if (lastDate.current && nowDate.getTime() - lastDate.current.getTime() <= delay) {
-      return
-    }
-
-    lastDate.current = nowDate
-    setLock(true)
-
-    let returnValue: any
-    try {
-      returnValue = await fun.apply(this, args)
-    } catch (error) {
-      setLock(false)
-      throw error
-    }
-
-    setTimeout(() => {
-      setLock(false)
-    }, delay)
-
-    return returnValue
-  }
-  return [fn, lock] as const
-}
-```
-
-- components\backend-pro\src\hooks\useExport.ts
+#### components\backend-pro\src\hooks\useExport.ts
 
 ```typescript
 import { useState } from 'react'
@@ -167,7 +123,7 @@ function jointQuery(url: string, params: { [i: string]: any } = {}) {
 }
 ```
 
-- components\backend-pro\src\hooks\useProTableRequest.ts
+#### components\backend-pro\src\hooks\useProTableRequest.ts
 
 ```ts
 import { ActionType, ProFormInstance, RequestData } from '@ant-design/pro-components'
@@ -427,7 +383,7 @@ function updateSearchParams(params: Record<string, string | number | boolean | n
 }
 ```
 
-- components\backend-pro\src\hooks\useProTableForm.ts
+#### components\backend-pro\src\hooks\useProTableForm.ts
 
 ```ts
 import { ModalFormProps } from '@ant-design/pro-components'
@@ -505,7 +461,52 @@ export default function useProTableForm<DataType = Record<string, any>>(option: 
 }
 ```
 
-- components\backend-pro\src\components\table\OperationsColumns.tsx
+#### components\backend-pro\src\hooks\useRouterParams.ts
+
+```ts
+import { useMemo, useRef } from 'react'
+
+export type RawParams = Record<string, string>
+export type DefaultParams = Partial<RawParams>
+
+/**
+ * 提取查询参数（同时支持 search 和 hash）
+ * @param searchOrHash 字符串 (例如 window.location.search 或 window.location.hash)
+ */
+function getQueryParams(searchOrHash: string): RawParams {
+  // 省略实现
+  return params
+}
+
+/**
+ * 获取路由参数
+ * @param option.parseFn 解析函数。
+ */
+export function useRouterParams<T = DefaultParams>(
+  option: {
+    parseFn?: (data: RawParams) => T
+  } = {}
+) {
+  const { parseFn } = option
+
+  const parseFnRef = useRef(parseFn)
+  parseFnRef.current = parseFn
+
+  let searchString = ''
+  if (typeof window !== 'undefined') {
+    searchString = window.location.search || window.location.hash
+  }
+
+  const params = useMemo(() => {
+    // ...省略实现
+    return rawParams as T
+  }, [searchString])
+
+  return [params] as const
+}
+```
+
+#### components\backend-pro\src\components\table\OperationsColumns.tsx
 
 ```ts
 import { Space } from 'antd'
@@ -614,7 +615,7 @@ const OperationsColumns = memo(Component)
 export default OperationsColumns
 ```
 
-- components\backend-pro\src\components\table\StatusSwitchColumn.tsx
+#### components\backend-pro\src\components\table\StatusSwitchColumn.tsx
 
 ```ts
 import { FC, memo, useState } from 'react'
@@ -651,7 +652,64 @@ const StatusSwitchColumn = memo(Component)
 export default StatusSwitchColumn
 ```
 
-- umi-max-function-page.yml umi 页面模板
+### react-hooks
+
+#### components\react-hooks\src\useSuperLock.ts
+
+```ts
+import { useState, useRef } from 'react'
+
+/**
+ * 超级锁钩子。未运行完毕锁。500毫秒运行一次锁。运行成功500毫秒后才能运行锁。
+ *
+ * @param setLoading
+ * @param fun
+ */
+export function useSuperLock<T extends (...args: any) => any>(fun: T, delay = 500) {
+  const [lock, setLock] = useState(false)
+  const lastDate = useRef<Date>()
+
+  const fn: any = async (...args: Parameters<T>) => {
+    if (lock) {
+      return
+    }
+
+    const nowDate = new Date()
+    if (lastDate.current && nowDate.getTime() - lastDate.current.getTime() <= delay) {
+      return
+    }
+
+    lastDate.current = nowDate
+    setLock(true)
+
+    let returnValue: any
+    try {
+      returnValue = await fun.apply(this, args)
+    } catch (error) {
+      setLock(false)
+      throw error
+    }
+
+    setTimeout(() => {
+      setLock(false)
+    }, delay)
+
+    return returnValue
+  }
+  return [fn, lock] as const
+}
+```
+
+### 代码模板
+
+提供不同类型页面模板。其中下面列明部分按需使用。如果不需要可以不在代码中编写
+
+- createStyles 用于创建样式
+- toolBarRender 用于自定义工具栏。比如导出按钮。
+- ModalForm 用于新增编辑操作。
+- 表单页面模板主体格式尤其是jsx部分必须保留布局格式
+
+#### umi-max-function-page.yml umi 页面模板
 
 ```yml
 name: '@wmeimob/umi-max-function-page'
@@ -766,12 +824,116 @@ tpl:
   #   }
 ```
 
-其中下面列明部分按需使用。如果不需要可以不在代码中编写
-  - createStyles 用于创建样式
-  - toolBarRender 用于自定义工具栏。比如导出按钮。
-  - ModalForm 用于新增编辑操作。
+#### umi-max-function-form-page.yml 表单页面模板
 
-## 代码要求
+```yml
+name: '@wmeimob/umi-max-function-form-page'
+description: |
+  Umi4 函数式表单页面模板，其中包含了一个表单组件，用于提交数据。
+  文件中有诸如[:=xxx:]的字符。这是模板变量。在生成模板的过程中。你可以通过模板变量来进行更加细致的控制。支持的变量有: CamelCaseName 组件驼峰命名;PascalName 组件帕斯卡命名;KebabCaseName 组件横杠线命名;UnderlineCase 下划线命名;dirname 组件目录名
+tpl:
+  index.tsx: >
+    import { FC, memo, useEffect, useRef, useState } from 'react'
+    import { FooterToolbar, PageContainer, ProForm, ProFormText, ProFormInstance } from '@ant-design/pro-components'
+    import ProFormImgUpload from '@wmeimob/backend-pro/src/components/form/proFormImgUpload'
+    import { createStyles } from 'antd-style'
+    import { history } from '@umijs/max'
+    import { message } from '@wmeimob/backend-pro'
+    import { api } from '~/request'
+    import { Button, Card } from 'antd'
+    import { upload } from '~/components/yun'
+    import { useSuperLock } from '@wmeimob/react-hooks/src/useSuperLock'
+    import { useRouterParams } from '@wmeimob/backend-pro/src/hooks/useRouterParams'
+
+    interface IFormValues {
+      id?: string
+      name: string
+    }
+
+    const useStyles = createStyles(() => ({
+      companyFormStyle: {}
+    }))
+
+    // 新增/编辑 页面
+    const Component: FC = () => {
+      const { styles } = useStyles()
+      const [{ id }] = useRouterParams<{ id?: string }>()
+      const isEdit = !!id
+
+      const [initialValues] = useState<Partial<IFormValues>>({})
+      const [loading, setLoading] = useState<boolean>(false)
+      const formRef = useRef<ProFormInstance>()
+
+      // 获取详情
+      useEffect(() => {
+        async function fetchDetail() {
+          try {
+            setLoading(true)
+            const { data = {} } = await api.get['/mock/company/detail/:id']({ id })
+            formRef.current?.setFieldsValue({ ...data })
+          } finally {
+            setLoading(false)
+          }
+        }
+
+        if (id) {
+          fetchDetail()
+        }
+      }, [id, isEdit])
+
+      /**
+      * 提交表单
+      */
+      const [handleFinish] = useSuperLock(async (values: IFormValues) => {
+        const submitData = {
+          ...values
+        }
+        try {
+          await api.post['/mock/company/save'](submitData)
+          message.success(`${isEdit ? '编辑' : '新增'}成功`)
+          // history.back()
+        } catch (_error) {
+          return false
+        }
+      })
+
+      return (
+        <PageContainer className={styles.companyFormStyle} loading={loading}>
+          <Card>
+            <ProForm<IFormValues>
+              formRef={formRef}
+              layout="horizontal"
+              labelCol={{ span: 3 }}
+              wrapperCol={{ span: 6 }}
+              initialValues={initialValues}
+              submitter={{
+                resetButtonProps: false,
+                searchConfig: { submitText: '保存' },
+                render: (_, dom) => (
+                  <FooterToolbar>
+                    <Button onClick={() => history.back()}>返回</Button>
+                    {dom}
+                  </FooterToolbar>
+                )
+              }}
+              onFinish={handleFinish}
+            >
+              <ProFormText name="name" label="名称" rules={[{ required: true, message: '请输入企业名称' }]} />
+              <ProFormImgUpload name="logo" label="企业Logo" upload={upload} />
+            </ProForm>
+          </Card>
+        </PageContainer>
+      )
+    }
+
+    const CompanyForm = memo(Component)
+    export default CompanyForm
+  index.module.less: |
+    .[:=CamelCaseName:]Style {
+    }
+```
+
+### 代码要求
 
 输出代码格式要求：
 
