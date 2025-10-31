@@ -737,15 +737,14 @@ description: |
     const Component: FC = () => {
       const { styles } = useStyles()
       const columns: ProColumns[] = [
-        // 搜索区域
+        // 搜索区域,固定都有hideInTable
         {
           title: '列1',
           dataIndex: 'id',
-          fieldProps: {
-            placeholder: '请输入'
-          }
+          hideInTable: true
+          fieldProps: { placeholder: '请输入' }
         },
-        // 表格区域
+        // 表格区域,固定都有hideInSearch
         { title: '列1', dataIndex: 'id', hideInSearch: true  },
         { title: '列2', dataIndex: '2', hideInSearch: true },
         { title: '列3', dataIndex: '3', hideInSearch: true },
