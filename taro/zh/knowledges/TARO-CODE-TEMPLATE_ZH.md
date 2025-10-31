@@ -1023,6 +1023,7 @@ tpl:
 输出代码格式要求：
 
 - 页面主体正常来说需要包含：PageContainer/MMNavigation
+- 除了上面列出的组件。你默认都可用使用 `@tarojs/components` 中的组件。
 - 如果是页面代码。需要在`src/app.config.ts`中正确配置路由并在`pages`目录下创建对应的页面组件代码。
 - 枚举文件/mock接口 等单独编写
 - 使用代码块包裹，标明语言（tsx, ts）
