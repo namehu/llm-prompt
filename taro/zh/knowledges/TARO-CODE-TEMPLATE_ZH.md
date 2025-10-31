@@ -31,6 +31,244 @@
 
 列出taro-design组件库的代码模板。
 
+#### components\taro-design\src\components\button
+
+```txt
+// index.tsx
+/**
+ * @name 按钮
+ * @description 按钮组件是用户界面中常见的交互元素，用于触发特定的操作或执行特定的功能。
+ */
+/* eslint-disable no-nested-ternary */
+import { View } from '@tarojs/components'
+import { ITouchEvent } from '@tarojs/components/types/common'
+import { FC, PropsWithChildren, ReactNode, memo, useMemo } from 'react'
+import classnames from 'classnames'
+import MMLoading from '../loading'
+import { MMButtonSize, MMButtonType } from './const'
+import styles from './index.modules.less'
+import { IComponentProps } from '../types'
+import { useLockFunction } from '@wmeimob/react-hooks/src/useLockFunction'
+
+export interface IButtonProps extends IComponentProps {
+  /**
+   * 按钮颜色
+   */
+  color?: string
+
+  /** 是否为幽灵按钮 */
+  ghost?: boolean
+
+  /**
+   * 加载状态
+   */
+  loading?: boolean
+
+  /**
+   * 按钮类型
+   */
+  type?: MMButtonType | keyof typeof MMButtonType
+
+  /**
+   * 按钮大小
+   */
+  size?: MMButtonSize | keyof typeof MMButtonSize
+
+  /**
+   * 禁用
+   */
+  disabled?: boolean
+
+  /** 是否为block元素 */
+  block?: boolean
+
+  /**
+   * 文字
+   */
+  text?: ReactNode
+
+  /**
+   * 圆角
+   *
+   * @description 设置为true.则携带默认圆角。 传递为数字则表示为指定值
+   */
+  radius?: boolean | number
+
+  /**
+   * 点击事件 返回的是promise 未运行完毕不会触发第二次
+   */
+  onClick?: (event: ITouchEvent) => void | Promise<any>
+}
+
+const Component: FC<PropsWithChildren<IButtonProps>> = (props) => {
+  const { type = MMButtonType.primary, size = MMButtonSize.default, ghost = false, color, block, radius, style, loading, className, text, disabled } = props
+
+  /**
+   * 按钮颜色
+   * 参数优先级 color > type
+   * ghost 参数会改变背景、字体和边框颜色
+   *
+   */
+  const colorStyle = useMemo(() => {
+    let { background, fontColor, borderColor } = {
+      [MMButtonType.primary]: {
+        background: styles.primaryColor,
+        borderColor: styles.primaryColor,
+        fontColor: '#ffffff'
+      },
+      [MMButtonType.warning]: {
+        background: styles.yellow,
+        borderColor: styles.yellow,
+        fontColor: '#ffffff'
+      },
+      [MMButtonType.default]: {
+        background: '#ffffff',
+        borderColor: styles.gray4,
+        fontColor: styles.gray6
+      }
+    }[type!]
+
+    if (color) {
+      background = color
+      borderColor = color
+    }
+
+    if (ghost) {
+      fontColor = borderColor
+      background = '#ffffff'
+    }
+
+    return {
+      background,
+      color: fontColor,
+      borderColor
+    }
+  }, [color, ghost, type])
+
+  const buttonStyle = {
+    display: block ? 'block' : 'inline-block',
+    borderRadius: typeof radius === 'number' ? radius : radius === false ? 0 : undefined,
+    ...colorStyle,
+    ...(style as any)
+  }
+
+  const rootClass = classnames(styles.MMButton, styles[size!], disabled && styles.disabled, className)
+
+  const onClick = useLockFunction((event: ITouchEvent) => {
+    if (disabled || loading) {
+      return
+    }
+    return props.onClick?.(event)
+  })
+
+  return (
+    <View className={rootClass} style={buttonStyle} onClick={onClick}>
+      <View className={styles.MMButton_content}>
+        {loading && (
+          <View className={styles.MMButton_loading}>
+            <MMLoading gray size={styles.loadingSize} />
+          </View>
+        )}
+
+        <View>{props.children || text}</View>
+      </View>
+    </View>
+  )
+}
+
+/**
+ * @name 按钮
+ */
+const MMButton = memo(Component)
+export default MMButton
+
+// const.ts
+export enum MMButtonType {
+  /** 默认 */
+  default = 'default',
+
+  /** 主色 */
+  primary = 'primary',
+
+  /** 警告 */
+  warning = 'warning'
+}
+
+export enum MMButtonSize {
+  large = 'large',
+  default = 'default',
+  small = 'small',
+  tiny = 'tiny'
+}
+
+// index.module.less
+@import '../styles/themes/default.less';
+
+@loadingSize: 20;
+
+:export {
+  loadingSize: @loadingSize;
+}
+
+.MMButton_content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.MMButton_loading {
+  width: 20px;
+  height: 20px;
+  margin-right: @spacingBase;
+}
+
+.MMButton {
+  box-sizing: border-box;
+  text-align: center;
+  color: @gray1;
+  border-radius: @buttonBorderRadius;
+  border-width: 1px;
+  border-style: solid;
+  padding: 0 @spacingBase * 3;
+  // display: inline-block;
+
+  &:active {
+    opacity: 0.8;
+  }
+
+  &.disabled {
+    opacity: 0.4 !important;
+
+    &:active {
+      // background: @buttonColor !important;
+      opacity: 0.4 !important;
+    }
+  }
+
+  &.large {
+    height: @buttonHeight + 4px;
+    font-size: @buttonFontSize + 2;
+  }
+
+  &.default {
+    height: @buttonHeight;
+    font-size: @buttonFontSize;
+  }
+
+  &.small {
+    height: @buttonHeight - 4px;
+    font-size: @buttonFontSize - 1px;
+  }
+
+  &.tiny {
+    height: @buttonHeight - 8px;
+    font-size: @buttonFontSize - 3px;
+    padding: 0 @spacingBase;
+  }
+}
+```
+
 #### components\taro-design\src\layout\pageContainer\index.tsx
 
 ```ts
@@ -210,36 +448,33 @@ import classnames from 'classnames'
 import MMIconFont from '../icon-font'
 import styles from './index.modules.less'
 import MMIconFontName from '../icon-font/const'
-import { MMNavigationType } from './const'
 import { IComponentProps } from '../types'
 
+ enum MMNavigationType {
+  /** 白色背景，黑色字体 */
+  Default = 'Default',
+  /** 透明背景。白色字体 */
+  Transparent = 'Transparent',
+
+  Primary = 'Primary'
+}
+
 export interface IMMNavigationProps extends IComponentProps {
-  /**
-   * 中间显示的标题
-   */
+  // 中间显示的标题
   title?: string
-
-  /**
-   * 渲染左边的元素
-   *
-   */
+  // 渲染左边的元素
   renderLeft?: ReactNode
-
-  /**
-   * 类型
-   */
+  // 类型
   type?: MMNavigationType | keyof typeof MMNavigationType
 
   /**
-   * 是否占据高度
-   *
+   * 是否占据高度 当有通栏的背景图时 或许比较有用
    * @default true
    */
   place?: boolean
 
   /**
    * 是否显示导航阴影
-   *
    * 默认情况下导航组件在下面会有一个box-shadow阴影。有时候你需要关掉它
    * @default true
    */
@@ -306,24 +541,11 @@ const Component: FC<PropsWithChildren<IMMNavigationProps>> = (props) => {
   }, [type, props.contentClass])
 
   async function hanldeNavBack() {
-    let result = true
-    if (beforeNavBack) {
-      result = await beforeNavBack()
-    }
-    if (result) {
-      Taro.navigateBack({ delta: 1 })
-    }
+    // 省略
   }
 
   const renderGoBack = () => {
-    const { length } = getCurrentPages()
-    return (
-      length > 1 && (
-        <View className={styles.goback} onClick={hanldeNavBack}>
-          <MMIconFont color={type === MMNavigationType.Default ? undefined : 'white'} value={MMIconFontName.Back} />
-        </View>
-      )
-    )
+    // // 省略
   }
 
   return (
@@ -356,7 +578,6 @@ const MMNavigation = memo(Component) as NamedExoticComponent<PropsWithChildren<I
 }
 
 MMNavigation.navigationHeight = navigationHeight
-
 export default MMNavigation
 
 ```
