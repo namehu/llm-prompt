@@ -964,7 +964,8 @@ tpl:
 
       // 自定义逻辑
       function customLogic() {
-        toast.success('自定义逻辑')
+        // toast和dialog 底层依赖PageContainer 所以可能未初始化
+        toast?.success('自定义逻辑')
         dialog?.show({title: '哈哈哈', content: '哈哈哈哈' })
       }
 
@@ -1020,7 +1021,7 @@ tpl:
 
 ### 代码要求
 
-输出代码格式要求：
+#### 输出代码格式要求：
 
 - 页面主体正常来说需要包含：PageContainer/MMNavigation
 - 除了上面列出的组件。你默认都可用使用 `@tarojs/components` 中的组件。
@@ -1052,3 +1053,10 @@ export const OCodeScene = [
 ```
 
 - 如有多文件协同，明确写好文件路径和引用关系。相对路径alias是 `~` 符号
+
+### 样式
+
+- 样式文件固定名称。 **index.module.less**。一个页面一个样式文件。
+- 样式类名采用驼峰命名。less 嵌套不多于三层。
+- 不要使用 :global()、id选择器等
+- 布局采用flex布局。间距采用margin或padding。非必要情况不要通过设置width或height来控制元素大小
