@@ -31,13 +31,40 @@ tpl:
           hideInTable: true,
           fieldProps: { placeholder: '请输入' }
         },
+        {
+          title: '下拉框',
+          dataIndex: 'status',
+          hideInTable: true,
+          valueType: 'select',
+          valueEnum: {
+            1: { text: '启用' },
+            0: { text: '禁用' }
+          },
+          fieldProps: { placeholder: '全部' }
+        },
         // 表格区域
-        { title: '列1', dataIndex: 'id', hideInSearch: true  },
+        { title: 'ID', dataIndex: 'id', hideInSearch: true  },
         { title: '列2', dataIndex: '2', hideInSearch: true },
-        { title: '列3', dataIndex: '3', hideInSearch: true },
-        { title: '列4', dataIndex: '4', hideInSearch: true },
-        { title: '列5', dataIndex: '5', hideInSearch: true },
-        { title: '列6', dataIndex: '6', hideInSearch: true },
+        { title: '头像', dataIndex: 'avatar', valueType: 'image', hideInSearch: true },
+        {
+          title: '状态切换',
+          dataIndex: 'status',
+          hideInSearch: true,
+          render: (_, record) => (
+            <StatusSwitchColumn
+              checked={!!record.status}
+              checkedChildren="启用"
+              unCheckedChildren="禁用"
+              onSwitch={async (checked) => {
+                await api.post['/mock/user/updateStatus']({ id: record.id, status: checked ? 1 : 0 })
+                message.success('状态更新成功')
+                tableProps.actionRef.current?.reload()
+              }}
+            />
+          )
+        },
+        { title: '长文本', dataIndex: 'remark', hideInSearch: true, ellipsis: true },
+        { title: '创建时间', dataIndex: 'gmtCreated', hideInSearch: true },
         {
           title: '操作',
           dataIndex: 'option',
