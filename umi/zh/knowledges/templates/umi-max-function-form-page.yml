@@ -1,0 +1,103 @@
+name: '@wmeimob/umi-max-function-form-page'
+description: |
+  Umi4 函数式表单页面模板，其中包含了一个表单组件，用于提交数据。
+tpl:
+  index.tsx: |
+    import { FC, memo, useEffect, useRef, useState } from 'react'
+    import { createStyles } from 'antd-style'
+    import { history } from '@umijs/max'
+    import { Button, Card } from 'antd'
+    import { FooterToolbar, PageContainer, ProForm, ProFormText, ProFormInstance } from '@ant-design/pro-components'
+    import ProFormImgUpload from '@wmeimob/backend-pro/src/components/form/proFormImgUpload'
+    import { message } from '@wmeimob/backend-pro'
+    import { api } from '~/request'
+    import { upload } from '~/components/yun'
+    import { useSuperLock } from '@wmeimob/react-hooks/src/useSuperLock'
+    import { useRouterParams } from '@wmeimob/backend-pro/src/hooks/useRouterParams'
+
+    interface IFormValues {
+      id?: string
+      name: string
+    }
+
+    const useStyles = createStyles(() => ({
+      [:=CamelCaseName:]Style: {}
+    }))
+
+    // 新增/编辑 页面
+    const Component: FC = () => {
+      const { styles } = useStyles()
+      const [{ id }] = useRouterParams<{ id?: string }>()
+      const isEdit = !!id
+
+      const [initialValues] = useState<Partial<IFormValues>>({})
+      const [loading, setLoading] = useState<boolean>(false)
+      const formRef = useRef<ProFormInstance>()
+
+      // 获取详情
+      useEffect(() => {
+        async function fetchDetail() {
+          try {
+            setLoading(true)
+            const { data = {} } = await api.get['/mock/company/detail/:id']({ id })
+            formRef.current?.setFieldsValue({ ...data })
+          } finally {
+            setLoading(false)
+          }
+        }
+
+        if (id) {
+          fetchDetail()
+        }
+      }, [id, isEdit])
+
+      /**
+      * 提交表单
+      */
+      const [handleFinish] = useSuperLock(async (values: IFormValues) => {
+        const submitData = {
+          ...values
+        }
+        try {
+          await api.post['/mock/company/save'](submitData)
+          message.success(`${isEdit ? '编辑' : '新增'}成功`)
+          // history.back()
+        } catch (_error) {
+          return false
+        }
+      })
+
+      return (
+        <PageContainer className={styles.[:=CamelCaseName:]Style} loading={loading}>
+          <Card>
+            <ProForm<IFormValues>
+              formRef={formRef}
+              layout="horizontal"
+              labelCol={{ span: 3 }}
+              wrapperCol={{ span: 6 }}
+              initialValues={initialValues}
+              submitter={{
+                resetButtonProps: false,
+                searchConfig: { submitText: '保存' },
+                render: (_, dom) => (
+                  <FooterToolbar>
+                    <Button onClick={() => history.back()}>返回</Button>
+                    {dom}
+                  </FooterToolbar>
+                )
+              }}
+              onFinish={handleFinish}
+            >
+              <ProFormText name="name" label="名称" rules={[{ required: true, message: '请输入名称' }]} />
+              <ProFormImgUpload name="logo" label="Logo" upload={upload} />
+            </ProForm>
+          </Card>
+        </PageContainer>
+      )
+    }
+
+    const CompanyForm = memo(Component)
+    export default CompanyForm
+  index.module.less: |
+    .[:=CamelCaseName:]Style {
+    }

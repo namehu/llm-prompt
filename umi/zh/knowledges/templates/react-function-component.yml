@@ -1,0 +1,25 @@
+name: '@wmeimob/react-function-component'
+description: React 函数组件模板
+tags:
+  - react
+  - react-component
+tpl:
+  index.tsx: |
+    import { FC, memo } from 'react'
+    import styles from './index.module.less'
+
+    interface I[:=PascalName:]Props {}
+
+    const Component: FC<I[:=PascalName:]Props> = (props) => {
+      const {} = props
+
+      return (
+        <div className={styles.[:=CamelCaseName:]Style}>[:=CamelCaseName:]</div>
+      )
+    }
+
+    const [:=PascalName:] = memo(Component)
+    export default [:=PascalName:]
+  index.module.less: |
+    .[:=CamelCaseName:]Style {
+    }

@@ -1,0 +1,74 @@
+name: '@wmeimob/umi-max-function-detail-page'
+description: |
+  Umi4 函数式详情页面模板，其中包含了一个详情组件，用于展示数据。
+tpl:
+  index.tsx: |
+    import { PageContainer, ProDescriptions } from '@ant-design/pro-components'
+    import { FC, memo, useEffect, useState } from 'react'
+    import { Button, Card, Image } from 'antd'
+    import { createStyles } from 'antd-style'
+    import { history } from '@umijs/max'
+    import { api } from '~/request'
+    import { useRouterParams } from '@wmeimob/backend-pro/src/hooks/useRouterParams'
+
+    const useStyles = createStyles(() => ({
+      [:=CamelCaseName:]DetailStyle: {}
+    }))
+
+    interface I[:=PascalName:]Detail {
+      id: string
+    }
+
+    // 详情页面
+    const Component: FC = () => {
+      const { styles } = useStyles()
+      const { id } = useRouterParams<{ id: string }>()
+
+      const [detail, setDetail] = useState<I[:=PascalName:]Detail>()
+      const [loading, setLoading] = useState<boolean>(false)
+
+      // 获取详情
+      useEffect(() => {
+        async function fetchDetail() {
+          try {
+            setLoading(true)
+            const { data } = await api.get['/mock/[:=KebabCaseName:]/detail/:id']({ id })
+            setDetail(data)
+          } finally {
+            setLoading(false)
+          }
+        }
+
+        if (id) {
+          fetchDetail()
+        }
+      }, [id])
+
+      return (
+        <PageContainer
+          className={styles.[:=CamelCaseName:]DetailStyle}
+          loading={loading}
+          footer={[
+            <Button key="back" onClick={() => history.back()}>
+              返回
+            </Button>
+          ]}
+        >
+          <Card>
+            <ProDescriptions
+              column={1}
+              bordered
+              labelStyle={{ width: 240 }}
+              dataSource={detail}
+              columns={[
+                { title: '名称', dataIndex: 'name' },
+                { title: '联系人', dataIndex: 'contact' }
+              ]}
+            />
+          </Card>
+        </PageContainer>
+      )
+    }
+
+    const [:=PascalName:]Detail = memo(Component)
+    export default [:=PascalName:]Detail
