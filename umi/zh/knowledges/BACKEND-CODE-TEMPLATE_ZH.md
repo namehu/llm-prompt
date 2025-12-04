@@ -714,37 +714,38 @@ export function useSuperLock<T extends (...args: any) => any>(fun: T, delay = 50
 
 ```yml
 name: '@wmeimob/umi-max-function-page'
-description: |
-  Umi4 函数式页面模板，其中
-  index.tsx: >
-    import { FC, memo, useState } from 'react'\n
-    import { Button } from 'antd'\n
-    import { history } from '@umijs/max'\n
-    import { createStyles } from 'antd-style'\n
-    import { PageContainer, ProColumns, ProTable, ModalForm, ProFormText } from
-    '@ant-design/pro-components'\n
-    import useProTableRequest from
-    '@wmeimob/backend-pro/src/hooks/useProTableRequest'\n
-    import OperationsColumns from
-    '@wmeimob/backend-pro/src/components/table/operationsColumns'\n
-    import { useSuperLock } from '@wmeimob/react-hooks/src/useSuperLock'\n
-    import useProTableForm from '@wmeimob/backend-pro/src/hooks/useProTableForm'\n
-    import { message } from '@wmeimob/backend-pro'\n
-    import { api } from '~/request'\n\n
+description: Umi4 函数式页面模板
+tags: []
+tpl:
+  index.tsx: |
+    import { FC, memo } from 'react'
+    import { Button } from 'antd'
+    import { history } from '@umijs/max'
+    import { createStyles } from 'antd-style'
+    import { PageContainer, ProColumns, ProTable, ModalForm, ProFormText } from '@ant-design/pro-components'
+    import useProTableRequest from '@wmeimob/backend-pro/src/hooks/useProTableRequest'
+    import OperationsColumns from '@wmeimob/backend-pro/src/components/table/operationsColumns'
+    import { useSuperLock } from '@wmeimob/react-hooks/src/useSuperLock'
+    import useProTableForm from '@wmeimob/backend-pro/src/hooks/useProTableForm'
+    import { message } from '@wmeimob/backend-pro'
+    import { api } from '~/request'
+
     const useStyles = createStyles(() => ({
       [:=CamelCaseName:]Style: { }
-    }))\n\n
+    }))
+
     const Component: FC = () => {
       const { styles } = useStyles()
+
       const columns: ProColumns[] = [
-        // 搜索区域,固定都有hideInTable
+        // 搜索区域
         {
           title: '列1',
           dataIndex: 'id',
-          hideInTable: true
+          hideInTable: true,
           fieldProps: { placeholder: '请输入' }
         },
-        // 表格区域,固定都有hideInSearch
+        // 表格区域
         { title: '列1', dataIndex: 'id', hideInSearch: true  },
         { title: '列2', dataIndex: '2', hideInSearch: true },
         { title: '列3', dataIndex: '3', hideInSearch: true },
@@ -814,12 +815,13 @@ description: |
           </ModalForm>
         </PageContainer>
       )
-    }\n\n
-    const [:=PascalName:] = memo(Component)\n
+    }
+
+    const [:=PascalName:] = memo(Component)
     export default [:=PascalName:]
-  # index.module.less: |
-  #   .[:=CamelCaseName:]Style {
-  #   }
+  index.module.less: |
+    .[:=CamelCaseName:]Style { }
+
 ```
 
 #### umi-max-function-form-page.yml 表单页面模板

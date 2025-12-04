@@ -937,37 +937,22 @@ name: '@wmeimob/taro-function-page'
 description: Taro 函数式页面模板
 tags: []
 tpl:
-  index.tsx: >
+  index.tsx: |
     import Taro from '@tarojs/taro'
     import { FC, memo, useEffect } from 'react'
     import { View } from '@tarojs/components'
     import styles from './index.module.less'
     import MMNavigation from '@wmeimob/taro-design/src/components/navigation'
-    import PageContainer, { useToast, useDialog } from
-    '@wmeimob/taro-design/src/layout/pageContainer'
-    import { api } from '~/request'
+    import PageContainer, { useToast } from '@wmeimob/taro-design/src/layout/pageContainer'
+
+    // interface IPageParams {}
 
     interface I[:=PascalName:]Props {}
 
     const Component: FC<I[:=PascalName:]Props> = () => {
-      const [toast] = useToast()
-      const dialog = useDialog()
+      // const toast = useToast()
 
-      useEffect(() => {
-        fetchDetail()
-      }, [])
-
-      async function fetchDetail() {
-        const res = await api.get['/mock/user']({})
-        setUser(res.data)
-      }
-
-      // 自定义逻辑
-      function customLogic() {
-        // toast和dialog 底层依赖PageContainer 所以可能未初始化
-        toast?.success('自定义逻辑')
-        dialog?.show({title: '哈哈哈', content: '哈哈哈哈' })
-      }
+      useEffect(() => {}, [])
 
       return (
         <PageContainer className={styles.[:=CamelCaseName:]Style}>
@@ -981,9 +966,11 @@ tpl:
     const [:=PascalName:] = memo(Component)
     export default [:=PascalName:]
   index.module.less: |
-    .[:=CamelCaseName:]Style {
-
-    }
+    .[:=CamelCaseName:]Style { }
+  index.config.ts: |
+    export default definePageConfig({
+      disableScroll: true
+    })
 ```
 
 #### taro-function-component.yml 组件模板
