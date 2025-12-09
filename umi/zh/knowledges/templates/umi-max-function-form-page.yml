@@ -1,6 +1,7 @@
 name: '@wmeimob/umi-max-function-form-page'
-description: |
-  Umi4 函数式表单页面模板，其中包含了一个表单组件，用于提交数据。
+type: ['umi-max-page']
+description: 表单页面模板
+order: 95
 tpl:
   index.tsx: |
     import { FC, memo, useEffect, useRef, useState } from 'react'
@@ -27,7 +28,7 @@ tpl:
     // 新增/编辑 页面
     const Component: FC = () => {
       const { styles } = useStyles()
-      const [{ id }] = useRouterParams<{ id?: string }>()
+      const { id } = useRouterParams<{ id?: string }>()
       const isEdit = !!id
 
       const [initialValues] = useState<Partial<IFormValues>>({})

@@ -1,6 +1,7 @@
 name: '@wmeimob/umi-max-function-detail-page'
-description: |
-  Umi4 函数式详情页面模板，其中包含了一个详情组件，用于展示数据。
+type: ['umi-max-page']
+description: 详情页面模板，包含一个详情组件，用于展示数据。
+order: 90
 tpl:
   index.tsx: |
     import { PageContainer, ProDescriptions } from '@ant-design/pro-components'

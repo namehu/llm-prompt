@@ -1,8 +1,6 @@
 name: '@wmeimob/react-function-component'
-description: React 函数组件模板
-tags:
-  - react
-  - react-component
+type: ['react-component']
+description: 组件模板
 tpl:
   index.tsx: |
     import { FC, memo } from 'react'

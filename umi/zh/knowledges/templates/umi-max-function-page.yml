@@ -1,7 +1,8 @@
-name: "@wmeimob/umi-max-function-page"
-description: |
-  Umi4 函数式页面模板。格式要求:
+name: '@wmeimob/umi-max-function-page'
+type: ['umi-max-page']
+description: 页面模板
 tags: []
+order: 99
 tpl:
   index.tsx: |
     import { FC, memo } from 'react'
@@ -13,6 +14,7 @@ tpl:
     import OperationsColumns from '@wmeimob/backend-pro/src/components/table/operationsColumns'
     import { useSuperLock } from '@wmeimob/react-hooks/src/useSuperLock'
     import useProTableForm from '@wmeimob/backend-pro/src/hooks/useProTableForm'
+    import StatusSwitchColumn from '@wmeimob/backend-pro/src/components/table/statusSwitchColumn'
     import { message } from '@wmeimob/backend-pro'
     import { api } from '~/request'
 
