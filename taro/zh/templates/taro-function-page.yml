@@ -1,0 +1,38 @@
+name: "@wmeimob/taro-function-page"
+description: Taro 函数式页面模板
+tags: []
+tpl:
+  index.tsx: |
+    import Taro from '@tarojs/taro'
+    import { FC, memo, useEffect } from 'react'
+    import { View } from '@tarojs/components'
+    import styles from './index.module.less'
+    import MMNavigation from '@wmeimob/taro-design/src/components/navigation'
+    import PageContainer, { useToast } from '@wmeimob/taro-design/src/layout/pageContainer'
+
+    // export interface IPageParams {}
+
+    interface I[:=PascalName:]Props {}
+
+    const Component: FC<I[:=PascalName:]Props> = () => {
+      // const toast = useToast()
+
+      useEffect(() => {}, [])
+
+      return (
+        <PageContainer className={styles.[:=CamelCaseName:]Style}>
+          <MMNavigation title="[:=CamelCaseName:]" />
+
+          <View>[:=CamelCaseName:]</View>
+        </PageContainer>
+      )
+    }
+
+    const [:=PascalName:] = memo(Component)
+    export default [:=PascalName:]
+  index.module.less: |
+    .[:=CamelCaseName:]Style { }
+  index.config.ts: |
+    export default definePageConfig({
+      disableScroll: true
+    })

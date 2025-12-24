@@ -1,0 +1,26 @@
+name: "@wmeimob/taro-function-component"
+description: Taro 函数组件模板
+tags: []
+tpl:
+  index.tsx: |
+    import { memo, FC } from 'react'
+    import { View, Text } from '@tarojs/components'
+    import styles from './index.module.less'
+
+    interface I[:=PascalName:]Props {}
+
+    const Component: FC<I[:=PascalName:]Props> = (props) => {
+      // const {} = props;
+
+      return (
+        <View className={styles.[:=CamelCaseName:]Style}>
+          <Text>[:=CamelCaseName:]</Text>
+        </View>
+      )
+    }
+
+    const [:=PascalName:] = memo(Component)
+    export default [:=PascalName:]
+  index.module.less: |
+    .[:=CamelCaseName:]Style {
+    }

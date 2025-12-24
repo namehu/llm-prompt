@@ -930,81 +930,10 @@ export function useSuperLock<T extends (...args: any) => any>(fun: T, delay = 50
 - 页面模板主体格式尤其是jsx部分必须保留布局格式
 - 文件中有诸如[:=xxx:]的字符。这是模板变量。在生成模板的过程中。你可以通过模板变量来进行更加细致的控制。支持的变量有: CamelCaseName 组件驼峰命名;PascalName 组件帕斯卡命名;KebabCaseName 组件横杠线命名;UnderlineCase 下划线命名;dirname 组件目录名
 
-#### taro-function-page.yml Taro 函数式页面模板
+#### [taro-function-page.yml](../templates//taro-function-page.yml) 页面模板
 
-```yml
-name: '@wmeimob/taro-function-page'
-description: Taro 函数式页面模板
-tags: []
-tpl:
-  index.tsx: |
-    import Taro from '@tarojs/taro'
-    import { FC, memo, useEffect } from 'react'
-    import { View } from '@tarojs/components'
-    import styles from './index.module.less'
-    import MMNavigation from '@wmeimob/taro-design/src/components/navigation'
-    import PageContainer, { useToast } from '@wmeimob/taro-design/src/layout/pageContainer'
 
-    // interface IPageParams {}
-
-    interface I[:=PascalName:]Props {}
-
-    const Component: FC<I[:=PascalName:]Props> = () => {
-      // const toast = useToast()
-
-      useEffect(() => {}, [])
-
-      return (
-        <PageContainer className={styles.[:=CamelCaseName:]Style}>
-          <MMNavigation title="[:=CamelCaseName:]" />
-
-          <View>[:=CamelCaseName:]</View>
-        </PageContainer>
-      )
-    }
-
-    const [:=PascalName:] = memo(Component)
-    export default [:=PascalName:]
-  index.module.less: |
-    .[:=CamelCaseName:]Style { }
-  index.config.ts: |
-    export default definePageConfig({
-      disableScroll: true
-    })
-```
-
-#### taro-function-component.yml 组件模板
-
-```yml
-name: '@wmeimob/taro-function-component'
-description: Taro 函数组件模板
-tags: []
-tpl:
-  index.tsx: |
-    import { memo, FC } from 'react'
-    import { View, Text } from '@tarojs/components'
-    import styles from './index.module.less'
-
-    interface I[:=PascalName:]Props {}
-
-    const Component: FC<I[:=PascalName:]Props> = (props) => {
-      // const {} = props;
-
-      return (
-        <View className={styles.[:=CamelCaseName:]Style}>
-          <Text>[:=CamelCaseName:]</Text>
-        </View>
-      )
-    }
-
-    const [:=PascalName:] = memo(Component)
-    export default [:=PascalName:]
-  index.module.less: |
-    .[:=CamelCaseName:]Style {
-
-    }
-
-```
+#### [taro-function-component.yml](../templates/taro-function-component.yml) 组件模板
 
 ### 代码要求
 
