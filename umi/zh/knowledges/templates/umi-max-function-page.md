@@ -1,0 +1,151 @@
+---
+name: '@wmeimob/umi-max-function-page'
+type:
+  - umi-max-page
+description: 页面模板
+tags: []
+order: 99
+---
+
+# 模板说明
+页面模板
+
+## 文件内容
+
+### index.tsx
+```tsx
+import { FC, memo } from 'react'
+import { Button } from 'antd'
+import { history } from '@umijs/max'
+import { createStyles } from 'antd-style'
+import { PageContainer, ProColumns, ProTable, ModalForm, ProFormText } from '@ant-design/pro-components'
+import useProTableRequest from '@wmeimob/backend-pro/src/hooks/useProTableRequest'
+import OperationsColumns from '@wmeimob/backend-pro/src/components/table/operationsColumns'
+import { useSuperLock } from '@wmeimob/react-hooks/src/useSuperLock'
+import useProTableForm from '@wmeimob/backend-pro/src/hooks/useProTableForm'
+import StatusSwitchColumn from '@wmeimob/backend-pro/src/components/table/statusSwitchColumn'
+import { message } from '@wmeimob/backend-pro'
+import { api } from '~/request'
+
+const useStyles = createStyles(() => ({
+  [:=CamelCaseName:]Style: { }
+}))
+
+const Component: FC = () => {
+  const { styles } = useStyles()
+
+  const columns: ProColumns[] = [
+    // 搜索区域
+    {
+      title: '列1',
+      dataIndex: 'id',
+      hideInTable: true,
+      fieldProps: { placeholder: '请输入' }
+    },
+    {
+      title: '下拉框',
+      dataIndex: 'status',
+      hideInTable: true,
+      valueType: 'select',
+      valueEnum: {
+        1: { text: '启用' },
+        0: { text: '禁用' }
+      },
+      fieldProps: { placeholder: '全部' }
+    },
+    // 表格区域
+    { title: 'ID', dataIndex: 'id', hideInSearch: true  },
+    { title: '列2', dataIndex: '2', hideInSearch: true },
+    { title: '头像', dataIndex: 'avatar', valueType: 'image', hideInSearch: true },
+    {
+      title: '状态切换',
+      dataIndex: 'status',
+      hideInSearch: true,
+      render: (_, record) => (
+        <StatusSwitchColumn
+          checked={!!record.status}
+          checkedChildren="启用"
+          unCheckedChildren="禁用"
+          onSwitch={async (checked) => {
+            await api.post['/mock/user/updateStatus']({ id: record.id, status: checked ? 1 : 0 })
+            message.success('状态更新成功')
+            tableProps.actionRef.current?.reload()
+          }}
+        />
+      )
+    },
+    { title: '长文本', dataIndex: 'remark', hideInSearch: true, ellipsis: true },
+    { title: '创建时间', dataIndex: 'gmtCreated', hideInSearch: true },
+    {
+      title: '操作',
+      dataIndex: 'option',
+      valueType: 'option',
+      render: (_, record) => {
+        return (
+          <OperationsColumns
+            operations={[
+              { id: 'edit', onClick: () => history.push(`/edit-page/${record.id}`) },
+              { id: 'del', onClick: async () => {} }
+            ]}
+          />
+        )
+      }
+    }
+  ]
+
+  const { tableProps, exportTable, exportLoading } = useProTableRequest(api.get['/mock/sysUser'], {
+    exportUrl: '/mock/export' // 导出URL
+  })
+
+  // 新增编辑弹窗
+  const { modalProps, setShowModal, editData } = useProTableForm<any>()
+
+  // 处理保存
+  const [handleFinish] = useSuperLock(async (values: any) => {
+    try {
+      await api.post['/mock/url'](values)
+      message.success('操作成功')
+      tableProps.actionRef.current?.reload()
+      return true // 返回true关闭弹窗
+    } catch (_error) {
+      return false
+    }
+  })
+
+  return (
+    <PageContainer className={styles.[:=CamelCaseName:]Style}>
+      <ProTable
+        {...tableProps}
+        columns={columns}
+        search={{
+          defaultCollapsed: false,
+          labelWidth: 'auto',
+          optionRender: (_searchConfig, _formProps, dom) => [
+            ...dom,
+            <Button type="primary" key="add" onClick={() => setShowModal()}>
+              新增
+            </Button>
+          ]
+        }}
+        toolBarRender={() => [
+          <Button key="export" loading={exportLoading} onClick={() => exportTable()}>
+            导出
+          </Button>
+        ]}
+      />
+
+      <ModalForm {...modalProps} onFinish={handleFinish}>
+        <ProFormText name="name" label="名称" placeholder="请输入名称" fieldProps={{ maxLength: 200 }} />
+      </ModalForm>
+    </PageContainer>
+  )
+}
+
+const [:=PascalName:] = memo(Component)
+export default [:=PascalName:]
+```
+
+### index.module.less
+```less
+.[:=CamelCaseName:]Style { }
+```

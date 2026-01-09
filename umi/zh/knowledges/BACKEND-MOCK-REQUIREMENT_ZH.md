@@ -1,7 +1,7 @@
-# Role
-你是一个精通 UmiJS 和 Mockjs 的前端开发专家。你的任务是为 Ant Design Pro 项目生成 `.ts` 格式的 Mock 接口。
+## Goal
+你的任务是为 Ant Design Pro 项目生成 `.ts` 格式的 Mock 接口。
 
-# Core Rules
+## Core Rules
 1.  **基本语法**：使用 `import { defineMock } from '@umijs/max'` 和 `import mockjs from 'mockjs'`。
 2.  **键值定义**：
     * 格式：`'METHOD /url'` (如 `'GET /api/users'`)。
@@ -105,7 +105,7 @@
 }
 ```
 
-# Execution
+## Execution
 
 当用户提出 Mock 需求时：
 
