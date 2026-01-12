@@ -38,10 +38,7 @@ let notification: NotificationInstance
 let modal: Omit<ModalStaticFunctions, 'warn'>
 
 export default () => {
-  const staticFunction = App.useApp()
-  message = staticFunction.message
-  modal = staticFunction.modal
-  notification = staticFunction.notification
+  // 初始化 antd 静态方法实例
   return null
 }
 
@@ -52,7 +49,6 @@ export { message, notification, modal }
 
 ```typescript
 import { useState } from 'react'
-import { getAuthorization } from '../utils/authorization'
 
 /**
  * 导出hook
@@ -66,56 +62,10 @@ export default function useExport(url = '') {
    * @returns
    */
   async function exportTable(params: Record<string, any> = {}) {
-    if (!url) {
-      return
-    }
-    const Authorization = getAuthorization()
-    try {
-      const headers = new Headers()
-      setLoading(true)
-      if (Authorization) {
-        headers.set('Authorization', Authorization)
-      }
-
-      const fetchUrl = jointQuery(url, { ...params, pageNum: 1, pageSize: undefined })
-
-      const option: any = { method: 'GET', headers, responseType: 'blob' }
-      const res = await fetch(fetchUrl, option)
-      const blobData = await res.blob()
-
-      const blob = new Blob([blobData], { type: 'application/vnd.ms-excel; charset=UTF-8' })
-      // 创建下载的链接
-      const downloadElement = document.createElement('a')
-      const href = window.URL.createObjectURL(blob)
-      downloadElement.href = href
-
-      const contentDisposition = res.headers!.get('content-disposition') || ''
-      const [_, fileName = ''] = contentDisposition.split('filename=')
-      downloadElement.download = decodeURI(fileName) || '' // 下载后文件名
-      document.body.appendChild(downloadElement)
-      downloadElement.click() // 点击下载
-      document.body.removeChild(downloadElement) // 下载完成移除元素
-      window.URL.revokeObjectURL(href) // 释放掉blob对象
-    } catch (error) {
-      console.error(`导出失败`, error)
-    }
-    setLoading(false)
+    // ... 实现逻辑：处理 Authorization，发起 fetch 请求，转换 Blob 并触发下载
   }
 
   return [exportTable, loading] as const
-}
-
-function jointQuery(url: string, params: { [i: string]: any } = {}) {
-  // 是否携带query
-  const query = Object.keys(params)
-    .filter((key) => ![undefined, null].includes(params[key])) // 排除掉无效值
-    .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
-    .join('&')
-
-  if (!query) {
-    return url
-  }
-  return url + (url.search(/\?/) === -1 ? '?' : '&') + query
 }
 ```
 
@@ -125,7 +75,6 @@ function jointQuery(url: string, params: { [i: string]: any } = {}) {
 import { ActionType, ProFormInstance, RequestData } from '@ant-design/pro-components'
 import { SortOrder } from 'antd/lib/table/interface'
 import { useCallback, useLayoutEffect, useRef } from 'react'
-import useExport from './useExport'
 
 type Params<U> = U & {
   pageSize?: number
@@ -179,78 +128,24 @@ export default function useProTableRequest<T, U extends Record<string, any> = {}
   fn: Fn<U, T>,
   option: IUseProTableRequestOption<T> = {}
 ) {
-  const { filterCache = false, dataFormat } = option
-
   // Table action 的引用，便于自定义触发
   const actionRef = useRef<ActionType>()
-
   const formRef = useRef<ProFormInstance>()
-
   // 缓存请求参数
   const requestParams = useRef<Record<string, any>>({})
   // 数据缓存参数
   const dataSourceRef = useRef<T[]>([])
 
   // 集成导出
-  const [exportTable, exportLoading] = useExport(option.exportUrl)
+  // ... useExport hook usage
 
   // 表格请求
   const tableRequst = useCallback(async (params: Params<U>, sort: Sort, filter: Filter) => {
-    const { current, ...rest } = params as Record<string, any>
-    let newParams: any = { ...rest, pageNum: current ?? params?.pageNum ?? 1 }
-
-    // 重置数据
-    let total = 0
-    let data: T[] = []
-
-    requestParams.current = option.paramsFormat ? option.paramsFormat(newParams) : newParams
-
-    try {
-      // 参数长度过长不处理
-      if (JSON.stringify(requestParams.current).length < 1000) {
-        const res = await fn(requestParams.current, sort, filter)
-        // 如果当前列表为空并且pageNum不为1.则重新发起请求
-        if (!res.data?.list?.length && requestParams.current.pageNum !== 1) {
-          setTimeout(() => {
-            actionRef.current?.reload(true)
-          })
-        }
-        const { list = [] as T[] } = res.data || {}
-        total = res.data?.total || 0
-        data = dataFormat ? dataFormat(list) : list
-        // 修改路由缓存筛选参数
-        // oxlint-disable-next-line no-unused-expressions
-        filterCache && updateSearchParams({ filter: JSON.stringify(requestParams.current) })
-
-        dataSourceRef.current = data
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
-    }
-
-    return { data, success: true, total } as Partial<RequestData<T>>
+     // ... 实现逻辑：处理分页参数，调用 fn 获取数据，处理 filterCache，返回 ProTable 所需数据格式
+     return { data: [], success: true, total: 0 } as Partial<RequestData<T>>
   }, [])
 
-  useLayoutEffect(() => {
-    const value = getFilterParams()
-    if (value) {
-      formRef.current?.setFieldsValue({ ...value }) // 恢复搜索表单
-      actionRef.current?.setPageInfo?.({ current: value.current ?? value.pageNum ?? 1, pageSize: value.pageSize }) // 恢复分页信息
-    }
-  }, [])
-
-  function getFilterParams() {
-    if (filterCache) {
-      const search = getSearchParams<{ filter?: string }>()
-      if (search.filter) {
-        try {
-          return JSON.parse(search.filter) ?? {}
-        } catch (error) {}
-      }
-    }
-    return null
-  }
+  // ... 恢复搜索表单和分页信息的 Effect
 
   return {
     tableProps: {
@@ -278,104 +173,23 @@ export default function useProTableRequest<T, U extends Record<string, any> = {}
      * 表格query参数
      */
     params: requestParams,
-
     /**
      * 表格数据缓存
      */
     dataSource: dataSourceRef,
-
     /**
      * 导出
      * @param params
      * @returns
      */
     exportTable: (params?: Record<string, any>) => {
-      return exportTable({ ...requestParams.current, ...params })
+      // ... implementation
     },
     /**
      * 导出loading
      */
-    exportLoading
+    exportLoading: false
   }
-}
-
-/**
- * 获取浏览器 URL 中的 search 参数
- * @template T - 返回的参数对象类型，默认为 Record<string, string>
- * @returns {T} 包含所有 search 参数的对象
- */
-function getSearchParams<T = Record<string, string>>(): T {
-  // 处理普通 URL 和 hash 模式的路由
-  let search = window.location.search
-  const hashIndex = window.location.href.indexOf('#')
-
-  // 如果是 hash 路由且 search 参数在 hash 后面
-  if (hashIndex !== -1) {
-    const hashPart = window.location.href.slice(hashIndex)
-    const hashSearchIndex = hashPart.indexOf('?')
-
-    if (hashSearchIndex !== -1) {
-      search = hashPart.slice(hashSearchIndex)
-    }
-  }
-
-  const params = new URLSearchParams(search)
-  const result = {} as T
-
-  // 将 URLSearchParams 转换为泛型对象
-  for (const [key, value] of params.entries()) {
-    ;(result as Record<string, string>)[key] = value
-  }
-
-  return result
-}
-
-/**
- * 更新 URL 的 search 参数（兼容 hash 路由模式）
- * @param params - 要更新的参数对象，值为 null 或 undefined 时删除该参数
- */
-function updateSearchParams(params: Record<string, string | number | boolean | null | undefined>): void {
-  const url = new URL(window.location.href)
-  const hash = url.hash
-
-  let hashPath = ''
-  let hashSearchParams: URLSearchParams | null = null
-
-  // 分解 hash 部分
-  if (hash) {
-    const [path, search] = hash.split('?', 2)
-    hashPath = path
-    hashSearchParams = new URLSearchParams(search || '')
-  }
-
-  // 判断参数是否在 hash 中
-  // const isHashSearch = hash.includes('?')
-  const isHashSearch = !!hashPath
-  const currentSearchParams = isHashSearch ? hashSearchParams : url.searchParams
-
-  if (!currentSearchParams) {
-    return
-  }
-
-  // 合并参数（处理值类型和删除逻辑）
-  Object.entries(params).forEach(([key, value]) => {
-    if (value === null) {
-      currentSearchParams.delete(key)
-    } else {
-      currentSearchParams.set(key, String(value))
-    }
-  })
-
-  // 重新构建 URL
-  if (isHashSearch && hashSearchParams) {
-    const newHash = hashPath + (hashSearchParams.toString() ? `?${hashSearchParams.toString()}` : '')
-    url.hash = newHash
-  } else {
-    url.search = currentSearchParams.toString()
-  }
-
-  // 更新 URL 而不刷新页面
-  window.history.replaceState(null, '', url)
 }
 ```
 
@@ -383,72 +197,40 @@ function updateSearchParams(params: Record<string, string | number | boolean | n
 
 ```ts
 import { ModalFormProps } from '@ant-design/pro-components'
-import { useForm } from 'antd/lib/form/Form'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 export interface IUseProTableFormOption<DataType> {
   title?: (data?: DataType) => string
-
   modalProps?: Partial<ModalFormProps>
 }
 
 export default function useProTableForm<DataType = Record<string, any>>(option: IUseProTableFormOption<DataType> = {}) {
-  const { title = (data) => (data ? '编辑' : '新增') } = option
+  // ... state definitions: open, editData, form instance
 
-  const [open, setOpen] = useState(false)
-  const [editData, setEditData] = useState<DataType>()
-  const [form] = useForm()
-  const initedRef = useRef(false) // [fix Instance created by useForm is not connect to any Form element. Forget to pass form prop](https://github.com/ant-design/ant-design/issues/21543)
+  // ... memo: modalProps configuration
 
-  const modalProps = useMemo(() => {
-    return {
-      layout: 'horizontal',
-      labelCol: { span: 4 },
-      wrapperCol: { span: 12 },
-      ...option.modalProps,
-      title: title(editData),
-      open,
-      form,
-      onVisibleChange: (value) => setOpen(value)
-    } as Omit<ModalFormProps, 'onFinish' | 'title'>
-  }, [editData, open, form, title, option.modalProps])
-
-  // 弹窗关闭清除数据
-  useEffect(() => {
-    if (!open && initedRef.current) {
-      setEditData(undefined)
-      // FIXED: 设置延时清空。防止弹窗里面存在request组件导致发出请求
-      setTimeout(() => {
-        form.resetFields()
-      }, 300)
-    }
-    initedRef.current = true
-  }, [open])
+  // ... effect: clean data on close
 
   /**
    * 设置显示弹窗并设置数据
    */
   function setShowModal(editData?: DataType) {
-    if (editData) {
-      setEditData(editData)
-      form.setFieldsValue(editData)
-    }
-    setOpen(true)
+     // ... implementation
   }
 
   return {
     // 组合props。 该props适合antd pro Form
-    modalProps,
-    editData,
+    modalProps: {},
+    editData: undefined,
     /**
      * 设置编辑数据
      * @deprecated 使用setShowModal
      */
-    setEditData,
+    setEditData: () => {},
     /**
      * 打开弹窗
      */
-    setOpen,
+    setOpen: () => {},
     /**
      * 打开弹窗并可以设置编辑数据
      */
@@ -466,15 +248,6 @@ export type RawParams = Record<string, string>
 export type DefaultParams = Partial<RawParams>
 
 /**
- * 提取查询参数（同时支持 search 和 hash）
- * @param searchOrHash 字符串 (例如 window.location.search 或 window.location.hash)
- */
-function getQueryParams(searchOrHash: string): RawParams {
-  // 省略实现
-  return params
-}
-
-/**
  * 获取路由参数
  * @param option.parseFn 解析函数。
  */
@@ -483,21 +256,8 @@ export function useRouterParams<T = DefaultParams>(
     parseFn?: (data: RawParams) => T
   } = {}
 ) {
-  const { parseFn } = option
-
-  const parseFnRef = useRef(parseFn)
-  parseFnRef.current = parseFn
-
-  let searchString = ''
-  if (typeof window !== 'undefined') {
-    searchString = window.location.search || window.location.hash
-  }
-
-  const params = useMemo(() => {
-    // ...省略实现
-    return rawParams as T
-  }, [searchString])
-
+  // ... implementation: 解析 window.location.search 或 hash，支持 parseFn
+  const params = {} as T
   return [params] as const
 }
 ```
@@ -506,9 +266,7 @@ export function useRouterParams<T = DefaultParams>(
 
 ```ts
 import { Space } from 'antd'
-import { FC, memo, ReactNode, useMemo } from 'react'
-import { createStyles } from 'antd-style'
-import { modal } from '../../index'
+import { FC, memo, ReactNode } from 'react'
 
 export type TOperationsColumnOperation =
   | {
@@ -541,66 +299,17 @@ export interface IOperationsColumnsProps {
   operations?: TOperationsColumnOperation[]
 }
 
-const useStyles = createStyles(({ token }) => ({
-  operationsColumnsStyle: {
-    '& a': {
-      whiteSpace: 'nowrap'
-    }
-  },
-  item: {
-    color: token.colorLink,
-    whiteSpace: 'nowrap',
-    cursor: 'pointer'
-  }
-}))
-
 /**
  * 表格操作列
  * @param props
  * @returns
  */
 const Component: FC<IOperationsColumnsProps> = (props) => {
-  const { operations } = props
-
-  const { styles } = useStyles()
-
-  const _operations = useMemo(
-    () =>
-      (operations || [])
-        .filter((item) => item.show !== false)
-        .map((item) => {
-          let { id, text } = item
-          text = text || { edit: '编辑', del: '删除' }[id] || id
-          return { ...item, text }
-        }),
-    [operations]
-  )
-
-  function handleClick({ id, onClick }: TOperationsColumnOperation) {
-    if (id === 'del') {
-      modal.confirm({ title: '确定删除?', onOk: onClick })
-    } else {
-      onClick?.()
-    }
-  }
+  // ... implementation: 过滤 operations，处理点击事件（删除弹窗确认）
 
   return (
-    <Space className={styles.operationsColumnsStyle}>
-      {_operations.map((ops) => {
-        const { id, text } = ops
-        if (typeof text === 'string') {
-          return (
-            <a key={id} className={styles.item} onClick={() => handleClick(ops)}>
-              {text}
-            </a>
-          )
-        }
-        return (
-          <span key={id} className={styles.item} onClick={() => handleClick(ops)}>
-            {text}
-          </span>
-        )
-      })}
+    <Space>
+      {/* ... 渲染操作链接或文本 */}
     </Space>
   )
 }
@@ -614,7 +323,7 @@ export default OperationsColumns
 #### components\backend-pro\src\components\table\StatusSwitchColumn.tsx
 
 ```ts
-import { FC, memo, useState } from 'react'
+import { FC, memo } from 'react'
 import { Switch, SwitchProps } from 'antd'
 export interface IStatusSwitchColumnProps extends SwitchProps {
   onSwitch(checked: boolean): Promise<any>
@@ -624,22 +333,9 @@ export interface IStatusSwitchColumnProps extends SwitchProps {
  * 状态切换列
  */
 const Component: FC<IStatusSwitchColumnProps> = (props) => {
-  // oxlint-disable-next-line no-unused-vars
-  const { onChange, onSwitch, ...rest } = props
-  const [loading, setLoading] = useState(false)
+  // ... implementation: 处理 switch 变更，包含 loading 状态和 try/catch 错误处理
 
-  const handleChange = async (checked: boolean) => {
-    setLoading(true)
-    try {
-      await onSwitch(checked)
-    } catch (error) {
-      // oxlint-disable-next-line no-console
-      console.error(error)
-    }
-    setLoading(false)
-  }
-
-  return <Switch {...rest} loading={loading} onChange={handleChange} />
+  return <Switch {...props} />
 }
 
 Component.displayName = 'StatusSwitchColumn'
@@ -662,36 +358,11 @@ import { useState, useRef } from 'react'
  * @param fun
  */
 export function useSuperLock<T extends (...args: any) => any>(fun: T, delay = 500) {
-  const [lock, setLock] = useState(false)
-  const lastDate = useRef<Date>()
-
+  // ... implementation: 锁逻辑控制
   const fn: any = async (...args: Parameters<T>) => {
-    if (lock) {
-      return
-    }
-
-    const nowDate = new Date()
-    if (lastDate.current && nowDate.getTime() - lastDate.current.getTime() <= delay) {
-      return
-    }
-
-    lastDate.current = nowDate
-    setLock(true)
-
-    let returnValue: any
-    try {
-      returnValue = await fun.apply(this, args)
-    } catch (error) {
-      setLock(false)
-      throw error
-    }
-
-    setTimeout(() => {
-      setLock(false)
-    }, delay)
-
-    return returnValue
+      // ... logic
   }
+  const lock = false
   return [fn, lock] as const
 }
 ```
@@ -721,12 +392,15 @@ export function useSuperLock<T extends (...args: any) => any>(fun: T, delay = 50
 /**
  * 短信code场景值
  */
-export enum ECodeScene {
+export const ECodeScene = {
   /** 注册 */
-  REG = 'REG',
+  REG: 'REG',
   /** 忘记密码 */
-  FORGOT = 'FORGOT'
-}
+  FORGOT: 'FORGOT'
+} as const 
+
+export type ECodeScene = (typeof ECodeScene)[keyof typeof ECodeScene] // 类型
+
 export const MCodeScene = {
   [ECodeScene.REG]: '注册',
   [ECodeScene.FORGOT]: '忘记密码'
